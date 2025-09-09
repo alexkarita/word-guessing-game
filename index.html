@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Guessing Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .word-display {
+            font-size: 3em;
+            font-weight: bold;
+            letter-spacing: 0.2em;
+            margin: 30px 0;
+            color: #4a90e2;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 3px dashed #e0e0e0;
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4a90e2;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .input-section {
+            margin: 30px 0;
+        }
+
+        #guessInput {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 3px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+        }
+
+        #guessInput:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+
+        .message {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 600;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .message.win {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .message.lose {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+
+        .guesses-list {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .guess-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            border-left: 4px solid #4a90e2;
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .word-display {
+                font-size: 2em;
+            }
+            
+            .game-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎯 Word Guessing Game</h1>
+        <p class="subtitle">Can you guess the secret word in 3 tries?</p>
+        
+        <div class="word-display" id="wordDisplay">
+            Ready to play?
+        </div>
+        
+        <div class="game-stats">
+            <div class="stat">
+                <div class="stat-number" id="guessCount">0</div>
+                <div class="stat-label">Guesses Made</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="remainingGuesses">3</div>
+                <div class="stat-label">Guesses Left</div>
+            </div>
+        </div>
+        
+        <div class="input-section">
+            <input type="text" id="guessInput" placeholder="Enter your guess..." maxlength="20">
+            <div>
+                <button class="btn" onclick="makeGuess()">Make Guess</button>
+                <button class="btn btn-secondary" onclick="newGame()">New Game</button>
+            </div>
+        </div>
+        
+        <div class="message" id="messageArea">
+            Welcome! Click "New Game" to start playing.
+        </div>
+        
+        <div class="guesses-list" id="guessesList"></div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            secretWord: '',
+            guesses: [],
+            guessCount: 0,
+            guessLimit: 3,
+            gameOver: false,
+            won: false
+        };
+
+        // Simulate the Python backend logic
+        function startNewGame() {
+            // You would typically fetch this from your Python backend
+            const words = ['chapati', 'python', 'computer', 'elephant', 'rainbow', 'mountain', 'ocean', 'butterfly'];
+            gameState.secretWord = words[Math.floor(Math.random() * words.length)];
+            gameState.guesses = [];
+            gameState.guessCount = 0;
+            gameState.gameOver = false;
+            gameState.won = false;
+            
+            updateDisplay();
+            document.getElementById('guessInput').disabled = false;
+            document.getElementById('messageArea').textContent = `I'm thinking of a ${gameState.secretWord.length}-letter word. Start guessing!`;
+            document.getElementById('messageArea').className = 'message info';
+            document.getElementById('wordDisplay').textContent = '_'.repeat(gameState.secretWord.length).split('').join(' ');
+        }
+
+        function makeGuess() {
+            if (gameState.gameOver) return;
+            
+            const input = document.getElementById('guessInput');
+            const guess = input.value.trim().toLowerCase();
+            
+            if (!guess) {
+                showMessage('Please enter a guess!', 'info');
+                return;
+            }
+            
+            if (gameState.guesses.includes(guess)) {
+                showMessage('You already guessed that word!', 'info');
+                return;
+            }
+            
+            // Add guess to list
+            gameState.guesses.push(guess);
+            gameState.guessCount++;
+            
+            // Check if guess is correct
+            if (guess === gameState.secretWord) {
+                gameState.won = true;
+                gameState.gameOver = true;
+                showMessage('🎉 Congratulations! You won!', 'win');
+                document.getElementById('wordDisplay').textContent = gameState.secretWord.toUpperCase();
+            } else if (gameState.guessCount >= gameState.guessLimit) {
+                gameState.gameOver = true;
+                showMessage(`💔 Game over! The word was "${gameState.secretWord.toUpperCase()}"`, 'lose');
+                document.getElementById('wordDisplay').textContent = gameState.secretWord.toUpperCase();
+            } else {
+                const remaining = gameState.guessLimit - gameState.guessCount;
+                showMessage(`❌ Wrong guess! ${remaining} guess${remaining !== 1 ? 'es' : ''} remaining.`, 'info');
+            }
+            
+            updateDisplay();
+            input.value = '';
+            
+            if (gameState.gameOver) {
+                input.disabled = true;
+            }
+        }
+
+        function newGame() {
+            startNewGame();
+            document.getElementById('guessesList').innerHTML = '';
+        }
+
+        function showMessage(text, type) {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.textContent = text;
+            messageArea.className = `message ${type}`;
+        }
+
+        function updateDisplay() {
+            document.getElementById('guessCount').textContent = gameState.guessCount;
+            document.getElementById('remainingGuesses').textContent = gameState.guessLimit - gameState.guessCount;
+            
+            // Update guesses list
+            const guessesList = document.getElementById('guessesList');
+            if (gameState.guesses.length > 0) {
+                guessesList.innerHTML = '<h3>Your Guesses:</h3>' + 
+                    gameState.guesses.map(guess => `<div class="guess-item">${guess}</div>`).join('');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('guessInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                makeGuess();
+            }
+        });
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', function() {
+            startNewGame();
+        });
+    </script>
+</body>
+</html>
